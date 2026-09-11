@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<title>Chuyện của chúng mình</title>
+
+<!-- ===== Cấu hình để "Thêm vào Màn hình chính" chạy như 1 app thật ===== -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#F3CBD8">
+<!-- iOS Safari -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Của Chúng Mình">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- ============================================================
+     CẤU HÌNH — chỉnh sửa các phần trong CONFIG bên dưới cho hợp với bạn
+     ============================================================ -->
+<script>
+  window.APP_CONFIG = {
+    // Dán config Firebase của bạn vào đây (xem README.md để biết cách lấy)
+    firebase: {
+      apiKey: "AIzaSyCvmlyEq4Zp_in0jobeXUgtlP-DrjAu9j8",
+      authDomain: "nhat-ky-tinh-yeu-d8be8.firebaseapp.com",
+      databaseURL: "https://nhat-ky-tinh-yeu-d8be8-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "nhat-ky-tinh-yeu-d8be8",
+      storageBucket: "nhat-ky-tinh-yeu-d8be8.firebasestorage.app",
+      messagingSenderId: "931857057118",
+      appId: "1:931857057118:web:ae27657586c9498ee8fbcf",
+      measurementId: "G-88K2DLTDM2"
+    },
+    // Tên hiển thị, mật khẩu (tự đặt) và biểu tượng cho từng người.
+    // Đổi mật khẩu ở đây trước khi đưa lên GitHub.
+    users: {
+      nam: { name: "Anh", password: "2002", emoji: "🤴", color: "#7C93C9" },
+      nu:  { name: "Em",  password: "2001", emoji: "👸", color: "#E88AA8" }
+    },
+    // Ngày bắt đầu yêu nhau (YYYY-MM-DD)
+    startDate: "2026-09-04",
+    // Tên hiển thị ở đầu trang
+    coupleTitle: "Câu chuyện của Anh & Em"
+  };
+</script>
+
+<style>
+  :root{
+    --cream:#FFF9F6;
+    --paper:#FFFDFB;
+    --blush:#FBE6EC;
+    --rose:#F3CBD8;
+    --rose-deep:#E88AA8;
+    --plum:#5B3A4B;
+    --plum-soft:#8A6575;
+    --gold:#D9A94E;
+    --line:#EED9DE;
+    --shadow: 0 10px 30px -12px rgba(91,58,75,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Quicksand',sans-serif;
+    color:var(--plum);
+    background:
+      radial-gradient(circle at 15% 8%, rgba(243,203,216,0.5), transparent 40%),
+      radial-gradient(circle at 90% 15%, rgba(217,169,78,0.12), transparent 35%),
+      linear-gradient(180deg, var(--cream), #FFF3EE 60%, var(--cream));
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.serif{ font-family:'Cormorant Garamond', serif; }
+  button{ font-family:inherit; cursor:pointer; }
+  input, textarea, select{ font-family:inherit; }
+
+  /* ---------- Layout shell ---------- */
+  #app{ max-width:560px; margin:0 auto; min-height:100vh; position:relative; padding-bottom:calc(86px + env(safe-area-inset-bottom)); }
+
+  /* ---------- Login ---------- */
+  #login-screen{
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:calc(32px + env(safe-area-inset-top)) 24px calc(32px + env(safe-area-inset-bottom)); text-align:center; gap:22px;
+  }
+  .login-mark{ font-size:15px; letter-spacing:.06em; color:var(--plum-soft); }
+  .login-title{ font-size:2.3rem; font-weight:600; margin:0; line-height:1.15; color:var(--plum); }
+  .login-sub{ color:var(--plum-soft); margin:0 0 6px; font-size:0.98rem; }
+  .who-row{ display:flex; gap:14px; }
+  .who-btn{
+    border:1.5px solid var(--line); background:var(--paper); border-radius:20px;
+    padding:20px 26px; min-width:120px; display:flex; flex-direction:column; align-items:center; gap:8px;
+    box-shadow:var(--shadow); transition:transform .18s ease, border-color .18s ease;
+  }
+  .who-btn:hover{ transform:translateY(-3px); border-color:var(--rose-deep); }
+  .who-btn.active{ border-color:var(--rose-deep); background:var(--blush); }
+  .who-emoji{ font-size:34px; }
+  .who-name{ font-weight:600; font-size:1.05rem; }
+  #pass-wrap{ display:none; flex-direction:column; align-items:center; gap:12px; width:100%; max-width:280px; }
+  #pass-input{
+    width:100%; padding:13px 16px; border-radius:14px; border:1.5px solid var(--line);
+    text-align:center; font-size:1.1rem; letter-spacing:.15em; background:var(--paper);
+  }
+  #pass-input:focus{ outline:none; border-color:var(--rose-deep); }
+  #login-btn{
+    width:100%; padding:13px; border-radius:14px; border:none; background:var(--rose-deep);
+    color:#fff; font-weight:700; font-size:1rem; box-shadow:var(--shadow);
+  }
+  #login-error{ color:#B4506B; font-size:.88rem; min-height:18px; }
+
+  /* ---------- Header ---------- */
+  header.top{
+    padding:calc(26px + env(safe-area-inset-top)) 22px 14px; display:flex; align-items:center; justify-content:space-between;
+  }
+  header.top .greet{ font-size:.85rem; color:var(--plum-soft); }
+  header.top h1{ margin:2px 0 0; font-size:1.5rem; font-weight:600; }
+  .logout-btn{
+    border:none; background:transparent; color:var(--plum-soft); font-size:.82rem;
+    text-decoration:underline; padding:4px;
+  }
+
+  /* ---------- Sections ---------- */
+  .view{ display:none; padding:6px 20px 20px; animation:fadeIn .35s ease; }
+  .view.active{ display:block; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+  /* Hero countdown */
+  .hero-card{
+    background:linear-gradient(160deg, var(--blush), var(--paper) 70%);
+    border-radius:28px; padding:30px 22px; text-align:center; box-shadow:var(--shadow);
+    border:1px solid var(--line); position:relative; overflow:hidden;
+  }
+  .hero-card::after{
+    content:"♡"; position:absolute; right:-10px; bottom:-24px; font-size:120px; color:var(--rose); opacity:.35;
+  }
+  .hero-days{ font-size:3.4rem; font-weight:600; color:var(--rose-deep); line-height:1; position:relative; z-index:1;}
+  .hero-label{ margin-top:4px; color:var(--plum-soft); font-size:.92rem; position:relative; z-index:1;}
+  .hero-since{ margin-top:10px; font-size:.82rem; color:var(--plum-soft); position:relative; z-index:1;}
+
+  /* Miss button */
+  .miss-section{ margin-top:22px; text-align:center; }
+  .miss-btn{
+    width:150px; height:150px; border-radius:50%; border:none; margin:0 auto;
+    background:radial-gradient(circle at 35% 30%, #ffffff30, transparent), var(--rose-deep);
+    color:#fff; font-size:2.4rem; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    box-shadow:0 14px 28px -10px rgba(232,138,168,.65); transition:transform .12s ease;
+    position:relative;
+  }
+  .miss-btn span.lbl{ font-family:'Quicksand'; font-size:.78rem; font-weight:700; margin-top:4px; }
+  .miss-btn:active{ transform:scale(.94); }
+  .miss-stats{ display:flex; justify-content:center; gap:26px; margin-top:18px; }
+  .miss-stat{ text-align:center; }
+  .miss-stat b{ display:block; font-size:1.4rem; color:var(--plum); font-family:'Cormorant Garamond'; }
+  .miss-stat span{ font-size:.78rem; color:var(--plum-soft); }
+  .miss-log{ margin-top:18px; text-align:left; }
+  .miss-log h3{ font-size:1rem; margin:0 0 8px; color:var(--plum-soft); font-weight:600; font-family:'Quicksand';}
+  .miss-item{ display:flex; justify-content:space-between; padding:9px 4px; border-bottom:1px dashed var(--line); font-size:.85rem; }
+
+  /* Upcoming banner */
+  .banner{
+    margin-top:18px; background:var(--paper); border:1px solid var(--line); border-radius:18px;
+    padding:14px 16px; display:flex; align-items:center; gap:12px; box-shadow:var(--shadow);
+  }
+  .banner .ic{ font-size:22px; }
+  .banner .txt b{ display:block; font-size:.95rem; }
+  .banner .txt span{ font-size:.78rem; color:var(--plum-soft); }
+
+  /* Section headers */
+  .sec-head{ display:flex; align-items:center; justify-content:space-between; margin:8px 0 14px; }
+  .sec-head h2{ margin:0; font-size:1.5rem; font-weight:600; }
+  .add-btn{
+    border:none; background:var(--plum); color:#fff; width:34px; height:34px; border-radius:50%;
+    font-size:1.2rem; line-height:1; box-shadow:var(--shadow);
+  }
+
+  /* Cards (diary / milestones / notes) */
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:16px 16px;
+    margin-bottom:12px; box-shadow:var(--shadow);
+  }
+  .card-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .badge{
+    font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:20px; color:#fff; white-space:nowrap;
+  }
+  .card-date{ font-size:.76rem; color:var(--plum-soft); margin-top:2px; }
+  .card-body{ margin-top:8px; font-size:.92rem; line-height:1.5; white-space:pre-wrap; }
+  .card-mood{ font-size:1.3rem; }
+  .del-x{ border:none; background:transparent; color:var(--plum-soft); font-size:.75rem; text-decoration:underline; padding:2px; margin-top:6px;}
+
+  .empty{ text-align:center; color:var(--plum-soft); font-size:.9rem; padding:30px 10px; }
+
+  /* Milestone timeline */
+  .timeline{ position:relative; padding-left:22px; }
+  .timeline::before{ content:""; position:absolute; left:6px; top:6px; bottom:6px; width:2px; background:var(--rose); }
+  .tl-item{ position:relative; margin-bottom:18px; }
+  .tl-item::before{ content:""; position:absolute; left:-22px; top:4px; width:10px; height:10px; border-radius:50%; background:var(--rose-deep); }
+  .tl-title{ font-weight:700; font-size:.98rem; }
+  .tl-date{ font-size:.78rem; color:var(--plum-soft); }
+  .tl-note{ font-size:.86rem; margin-top:3px; color:var(--plum); }
+  .tl-days{ font-size:.74rem; color:var(--gold); font-weight:700; }
+
+  /* Notes */
+  .note-unread{ border-color:var(--rose-deep); }
+  .note-actions{ display:flex; gap:12px; margin-top:8px; }
+  .note-actions button{ border:none; background:transparent; font-size:.78rem; color:var(--plum-soft); text-decoration:underline; padding:0;}
+
+  /* Forms / modal */
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(91,58,75,0.35); display:none; align-items:flex-end; justify-content:center; z-index:50;
+  }
+  .modal-bg.show{ display:flex; }
+  .modal{
+    background:var(--cream); width:100%; max-width:560px; border-radius:26px 26px 0 0; padding:24px 22px 28px;
+    animation:slideUp .25s ease;
+  }
+  @keyframes slideUp{ from{ transform:translateY(30px); opacity:0;} to{ transform:none; opacity:1; } }
+  .modal h3{ margin:0 0 14px; font-size:1.3rem; }
+  .field{ margin-bottom:12px; }
+  .field label{ display:block; font-size:.8rem; color:var(--plum-soft); margin-bottom:5px; }
+  .field input, .field textarea, .field select{
+    width:100%; padding:11px 13px; border-radius:12px; border:1.5px solid var(--line); background:var(--paper); font-size:.92rem;
+  }
+  .field textarea{ min-height:90px; resize:vertical; }
+  .mood-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .mood-opt{
+    border:1.5px solid var(--line); background:var(--paper); border-radius:12px; padding:8px 10px; font-size:1.2rem;
+  }
+  .mood-opt.sel{ border-color:var(--rose-deep); background:var(--blush); }
+  .modal-actions{ display:flex; gap:10px; margin-top:16px; }
+  .btn-primary{ flex:1; border:none; background:var(--rose-deep); color:#fff; padding:12px; border-radius:14px; font-weight:700; }
+  .btn-ghost{ flex:1; border:1.5px solid var(--line); background:transparent; color:var(--plum-soft); padding:12px; border-radius:14px; font-weight:600; }
+
+  /* Bottom nav */
+  nav.tabbar{
+    position:fixed; left:0; right:0; bottom:0; max-width:560px; margin:0 auto;
+    background:var(--paper); border-top:1px solid var(--line); display:flex; justify-content:space-around;
+    padding:10px 6px calc(14px + env(safe-area-inset-bottom)); box-shadow:0 -8px 24px -14px rgba(91,58,75,.25);
+  }
+  nav.tabbar button{
+    border:none; background:transparent; display:flex; flex-direction:column; align-items:center; gap:2px;
+    color:var(--plum-soft); font-size:.68rem; flex:1;
+  }
+  nav.tabbar button .ic{ font-size:1.25rem; }
+  nav.tabbar button.active{ color:var(--rose-deep); }
+
+  .heart-pop{
+    position:fixed; pointer-events:none; font-size:1.4rem; color:var(--rose-deep); z-index:99;
+    animation:floatUp 1.1s ease forwards;
+  }
+  @keyframes floatUp{ to{ transform:translateY(-90px) scale(1.3); opacity:0; } }
+
+  #toast{
+    position:fixed; top:16px; left:50%; transform:translateX(-50%); background:var(--plum); color:#fff;
+    padding:10px 18px; border-radius:14px; font-size:.85rem; z-index:100; opacity:0; transition:opacity .25s ease; pointer-events:none;
+  }
+  #toast.show{ opacity:1; }
+
+  select#settings-who{ margin-bottom:10px; }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ================= LOGIN ================= -->
+  <div id="login-screen">
+    <div class="login-mark">✧ nhật ký của chúng mình ✧</div>
+    <h1 class="login-title" id="login-title-text">Chuyện của chúng mình</h1>
+    <p class="login-sub">Chọn xem bạn là ai để bắt đầu nhé</p>
+    <div class="who-row">
+      <button class="who-btn" id="btn-nam" onclick="selectWho('nam')">
+        <span class="who-emoji" id="emoji-nam">🤴</span>
+        <span class="who-name" id="name-nam">Anh</span>
+      </button>
+      <button class="who-btn" id="btn-nu" onclick="selectWho('nu')">
+        <span class="who-emoji" id="emoji-nu">👸</span>
+        <span class="who-name" id="name-nu">Em</span>
+      </button>
+    </div>
+    <div id="pass-wrap">
+      <input type="password" id="pass-input" placeholder="Mật khẩu" maxlength="20">
+      <button id="login-btn" onclick="tryLogin()">Vào thôi</button>
+      <div id="login-error"></div>
+    </div>
+  </div>
+
+  <!-- ================= MAIN APP ================= -->
+  <div id="main-app" style="display:none;">
+    <header class="top">
+      <div>
+        <div class="greet" id="greet-text">Chào buổi sáng,</div>
+        <h1 id="header-title">Chuyện của chúng mình</h1>
+      </div>
+      <button class="logout-btn" onclick="logout()">Đăng xuất</button>
+    </header>
+
+    <!-- ---- Trang chủ ---- -->
+    <section class="view active" id="view-home">
+      <div class="hero-card">
+        <div class="hero-days" id="days-together">0</div>
+        <div class="hero-label">ngày mình đã bên nhau</div>
+        <div class="hero-since" id="since-text"></div>
+      </div>
+
+      <div class="banner" id="upcoming-banner" style="display:none;">
+        <div class="ic">🎉</div>
+        <div class="txt">
+          <b id="upcoming-title"></b>
+          <span id="upcoming-days"></span>
+        </div>
+      </div>
+
+      <div class="miss-section">
+        <button class="miss-btn" onclick="pressMiss(event)">
+          💗<span class="lbl" id="miss-btn-label">NHỚ EM</span>
+        </button>
+        <div class="miss-stats">
+          <div class="miss-stat"><b id="stat-mine">0</b><span id="stat-mine-label">Anh đã nhớ</span></div>
+          <div class="miss-stat"><b id="stat-theirs">0</b><span id="stat-theirs-label">Em đã nhớ</span></div>
+        </div>
+        <div class="miss-log">
+          <h3>Khoảnh khắc nhớ nhau gần đây</h3>
+          <div id="miss-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- Nhật ký ---- -->
+    <section class="view" id="view-diary">
+      <div class="sec-head">
+        <h2>Nhật ký</h2>
+        <button class="add-btn" onclick="openDiaryModal()">+</button>
+      </div>
+      <div id="diary-list"></div>
+    </section>
+
+    <!-- ---- Kỷ niệm ---- -->
+    <section class="view" id="view-milestones">
+      <div class="sec-head">
+        <h2>Kỷ niệm</h2>
+        <button class="add-btn" onclick="openMilestoneModal()">+</button>
+      </div>
+      <div class="timeline" id="milestone-list"></div>
+    </section>
+
+    <!-- ---- Nhắn nhủ ---- -->
+    <section class="view" id="view-notes">
+      <div class="sec-head">
+        <h2>Nhắn nhủ</h2>
+        <button class="add-btn" onclick="openNoteModal()">+</button>
+      </div>
+      <div id="note-list"></div>
+    </section>
+
+    <!-- ---- Cài đặt ---- -->
+    <section class="view" id="view-settings">
+      <div class="sec-head"><h2>Cài đặt</h2></div>
+      <div class="card">
+        <div class="field">
+          <label>Tên hiển thị của bạn</label>
+          <input id="settings-myname" placeholder="Tên của bạn">
+        </div>
+        <div class="field">
+          <label>Ngày bắt đầu yêu nhau</label>
+          <input type="date" id="settings-startdate">
+        </div>
+        <button class="btn-primary" onclick="saveSettings()">Lưu thay đổi</button>
+      </div>
+    </section>
+
+    <nav class="tabbar">
+      <button class="tab-btn active" data-view="home" onclick="showView('home')"><span class="ic">🏠</span>Trang chủ</button>
+      <button class="tab-btn" data-view="diary" onclick="showView('diary')"><span class="ic">📔</span>Nhật ký</button>
+      <button class="tab-btn" data-view="milestones" onclick="showView('milestones')"><span class="ic">📍</span>Kỷ niệm</button>
+      <button class="tab-btn" data-view="notes" onclick="showView('notes')"><span class="ic">💌</span>Nhắn nhủ</button>
+      <button class="tab-btn" data-view="settings" onclick="showView('settings')"><span class="ic">⚙️</span>Cài đặt</button>
+    </nav>
+  </div>
+</div>
+
+<!-- ============ MODALS ============ -->
+<div class="modal-bg" id="diary-modal">
+  <div class="modal">
+    <h3>Viết nhật ký</h3>
+    <div class="field">
+      <label>Hôm nay tâm trạng thế nào?</label>
+      <div class="mood-row" id="mood-row"></div>
+    </div>
+    <div class="field">
+      <label>Ngày</label>
+      <input type="date" id="diary-date">
+    </div>
+    <div class="field">
+      <label>Bạn muốn viết gì?</label>
+      <textarea id="diary-text" placeholder="Hôm nay mình đã..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('diary-modal')">Huỷ</button>
+      <button class="btn-primary" onclick="saveDiary()">Lưu lại</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="milestone-modal">
+  <div class="modal">
+    <h3>Thêm cột mốc</h3>
+    <div class="field">
+      <label>Tên sự kiện</label>
+      <input id="ms-title" placeholder="Ví dụ: Lần đầu gặp nhau">
+    </div>
+    <div class="field">
+      <label>Ngày</label>
+      <input type="date" id="ms-date">
+    </div>
+    <div class="field">
+      <label>Có nhắc lại hằng năm không?</label>
+      <select id="ms-repeat">
+        <option value="yes">Có — nhắc mỗi năm</option>
+        <option value="no">Không — chỉ một lần</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Ghi chú (không bắt buộc)</label>
+      <textarea id="ms-note" placeholder="Kỷ niệm nhỏ về ngày này..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('milestone-modal')">Huỷ</button>
+      <button class="btn-primary" onclick="saveMilestone()">Lưu lại</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="note-modal">
+  <div class="modal">
+    <h3>Nhắn gửi yêu thương</h3>
+    <div class="field">
+      <label>Lời nhắn</label>
+      <textarea id="note-text" placeholder="Hôm nay ăn gì chưa? Nhớ mặc ấm nha..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('note-modal')">Huỷ</button>
+      <button class="btn-primary" onclick="saveNote()">Gửi</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+/* =========================================================
+   KHỞI TẠO
+   ========================================================= */
+const CFG = window.APP_CONFIG;
+let db, currentUser = null, pendingWho = null;
+let diaryData = {}, milestoneData = {}, noteData = {}, missData = {};
+
+const MOODS = ["🥰","😊","🥲","😴","😤","🤒","🎉","💭"];
+
+function init(){
+  try{
+    firebase.initializeApp(CFG.firebase);
+    db = firebase.database();
+  }catch(e){
+    console.error(e);
+    document.getElementById('login-error').textContent = "Chưa cấu hình Firebase — xem README.md";
+  }
+
+  document.getElementById('login-title-text').textContent = CFG.coupleTitle;
+  document.getElementById('header-title').textContent = CFG.coupleTitle;
+  document.getElementById('emoji-nam').textContent = CFG.users.nam.emoji;
+  document.getElementById('name-nam').textContent = CFG.users.nam.name;
+  document.getElementById('emoji-nu').textContent = CFG.users.nu.emoji;
+  document.getElementById('name-nu').textContent = CFG.users.nu.name;
+  document.getElementById('settings-startdate').value = CFG.startDate;
+
+  MOODS.forEach(m=>{
+    const b = document.createElement('button');
+    b.className='mood-opt'; b.type='button'; b.textContent=m;
+    b.onclick=()=>{ document.querySelectorAll('.mood-opt').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); b.dataset.sel='1';};
+    document.getElementById('mood-row').appendChild(b);
+  });
+
+  const saved = localStorage.getItem('love_app_session');
+  if(saved){ currentUser = saved; enterApp(); }
+}
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+function selectWho(who){
+  pendingWho = who;
+  document.getElementById('btn-nam').classList.toggle('active', who==='nam');
+  document.getElementById('btn-nu').classList.toggle('active', who==='nu');
+  document.getElementById('pass-wrap').style.display='flex';
+  document.getElementById('pass-input').value='';
+  document.getElementById('login-error').textContent='';
+  document.getElementById('pass-input').focus();
+}
+function tryLogin(){
+  const val = document.getElementById('pass-input').value;
+  if(!pendingWho){ return; }
+  if(val === CFG.users[pendingWho].password){
+    currentUser = pendingWho;
+    localStorage.setItem('love_app_session', currentUser);
+    enterApp();
+  }else{
+    document.getElementById('login-error').textContent = "Sai mật khẩu rồi, thử lại nha";
+  }
+}
+document.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && document.getElementById('pass-wrap').style.display==='flex') tryLogin();
+});
+function logout(){
+  localStorage.removeItem('love_app_session');
+  currentUser = null;
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+}
+
+function otherOf(who){ return who==='nam' ? 'nu' : 'nam'; }
+
+function enterApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  const me = CFG.users[currentUser];
+  const hr = new Date().getHours();
+  const greet = hr<11 ? 'Chào buổi sáng,' : hr<18 ? 'Chào buổi chiều,' : 'Chào buổi tối,';
+  document.getElementById('greet-text').textContent = greet + ' ' + me.name;
+  document.getElementById('miss-btn-label').textContent = 'NHỚ ' + CFG.users[otherOf(currentUser)].name.toUpperCase();
+  document.getElementById('stat-mine-label').textContent = me.name + ' đã nhớ';
+  document.getElementById('stat-theirs-label').textContent = CFG.users[otherOf(currentUser)].name + ' đã nhớ';
+  document.getElementById('settings-myname').value = me.name;
+
+  computeDaysTogether();
+  attachListeners();
+}
+
+/* =========================================================
+   ĐẾM NGÀY YÊU NHAU
+   ========================================================= */
+function computeDaysTogether(){
+  const start = new Date(CFG.startDate + 'T00:00:00');
+  const now = new Date();
+  const diff = Math.floor((now - start) / 86400000);
+  document.getElementById('days-together').textContent = diff.toLocaleString('vi-VN');
+  document.getElementById('since-text').textContent = 'kể từ ' + formatDate(CFG.startDate);
+}
+function formatDate(d){
+  const dt = new Date(d + (d.length===10 && d.indexOf('T')<0 ? 'T00:00:00':''));
+  return dt.toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit', year:'numeric'});
+}
+
+/* =========================================================
+   FIREBASE LISTENERS
+   ========================================================= */
+function attachListeners(){
+  if(!db) return;
+  db.ref('diary').on('value', snap=>{ diaryData = snap.val()||{}; renderDiary(); });
+  db.ref('milestones').on('value', snap=>{ milestoneData = snap.val()||{}; renderMilestones(); });
+  db.ref('notes').on('value', snap=>{ noteData = snap.val()||{}; renderNotes(); });
+  db.ref('misses').on('value', snap=>{ missData = snap.val()||{}; renderMiss(); });
+}
+
+/* =========================================================
+   NÚT NHỚ
+   ========================================================= */
+function pressMiss(e){
+  if(!db) return;
+  const id = db.ref('misses').push().key;
+  db.ref('misses/'+id).set({ who: currentUser, ts: Date.now() });
+  spawnHeart(e);
+  showToast('Đã gửi một nỗi nhớ 💗');
+}
+function spawnHeart(e){
+  const h = document.createElement('div');
+  h.className='heart-pop'; h.textContent='💗';
+  const rect = e.target.getBoundingClientRect();
+  h.style.left = (rect.left + rect.width/2 - 10) + 'px';
+  h.style.top = (rect.top) + 'px';
+  document.body.appendChild(h);
+  setTimeout(()=>h.remove(), 1200);
+}
+function renderMiss(){
+  const entries = Object.entries(missData).sort((a,b)=>b[1].ts-a[1].ts);
+  const mine = entries.filter(([,v])=>v.who===currentUser).length;
+  const theirs = entries.filter(([,v])=>v.who!==currentUser).length;
+  document.getElementById('stat-mine').textContent = mine;
+  document.getElementById('stat-theirs').textContent = theirs;
+  const list = document.getElementById('miss-list');
+  if(entries.length===0){ list.innerHTML = '<div class="empty">Chưa có ai nhớ ai cả, bấm nút phía trên đi nào 💗</div>'; return; }
+  list.innerHTML = entries.slice(0,8).map(([,v])=>{
+    const name = CFG.users[v.who].name;
+    const d = new Date(v.ts);
+    return `<div class="miss-item"><span>${CFG.users[v.who].emoji} ${name} đã nhớ</span><span>${d.toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</span></div>`;
+  }).join('');
+}
+
+/* =========================================================
+   NHẬT KÝ
+   ========================================================= */
+function openDiaryModal(){
+  document.getElementById('diary-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('diary-text').value='';
+  document.querySelectorAll('.mood-opt').forEach(x=>{x.classList.remove('sel'); delete x.dataset.sel;});
+  document.getElementById('diary-modal').classList.add('show');
+}
+function saveDiary(){
+  const text = document.getElementById('diary-text').value.trim();
+  const date = document.getElementById('diary-date').value;
+  const moodBtn = document.querySelector('.mood-opt.sel');
+  if(!text){ showToast('Bạn chưa viết gì cả'); return; }
+  const id = db.ref('diary').push().key;
+  db.ref('diary/'+id).set({
+    author: currentUser, date, mood: moodBtn?moodBtn.textContent:'💭', text, createdAt: Date.now()
+  });
+  closeModal('diary-modal');
+  showToast('Đã lưu vào nhật ký');
+}
+function renderDiary(){
+  const list = document.getElementById('diary-list');
+  const entries = Object.entries(diaryData).sort((a,b)=>b[1].createdAt-a[1].createdAt);
+  if(entries.length===0){ list.innerHTML='<div class="empty">Chưa có trang nhật ký nào. Viết trang đầu tiên nhé 📔</div>'; return; }
+  list.innerHTML = entries.map(([id,v])=>{
+    const u = CFG.users[v.author];
+    return `<div class="card">
+      <div class="card-top">
+        <div><span class="badge" style="background:${u.color}">${u.emoji} ${u.name}</span></div>
+        <div class="card-mood">${v.mood}</div>
+      </div>
+      <div class="card-date">${formatDate(v.date)}</div>
+      <div class="card-body">${escapeHtml(v.text)}</div>
+      ${v.author===currentUser?`<button class="del-x" onclick="removeItem('diary','${id}')">Xoá</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+/* =========================================================
+   KỶ NIỆM / MỐC QUAN TRỌNG
+   ========================================================= */
+function openMilestoneModal(){
+  document.getElementById('ms-title').value='';
+  document.getElementById('ms-date').value='';
+  document.getElementById('ms-note').value='';
+  document.getElementById('ms-repeat').value='yes';
+  document.getElementById('milestone-modal').classList.add('show');
+}
+function saveMilestone(){
+  const title = document.getElementById('ms-title').value.trim();
+  const date = document.getElementById('ms-date').value;
+  if(!title || !date){ showToast('Điền tên và ngày nhé'); return; }
+  const id = db.ref('milestones').push().key;
+  db.ref('milestones/'+id).set({
+    title, date, repeat: document.getElementById('ms-repeat').value,
+    note: document.getElementById('ms-note').value.trim(), createdBy: currentUser, createdAt: Date.now()
+  });
+  closeModal('milestone-modal');
+  showToast('Đã thêm cột mốc mới');
+}
+function nextOccurrence(dateStr, repeat){
+  const base = new Date(dateStr+'T00:00:00');
+  if(repeat!=='yes') return base;
+  const now = new Date();
+  let next = new Date(now.getFullYear(), base.getMonth(), base.getDate());
+  if(next < new Date(now.getFullYear(),now.getMonth(),now.getDate())) next.setFullYear(next.getFullYear()+1);
+  return next;
+}
+function renderMilestones(){
+  const list = document.getElementById('milestone-list');
+  const entries = Object.entries(milestoneData);
+  if(entries.length===0){ list.innerHTML='<div class="empty">Chưa có cột mốc nào. Thêm ngày đầu tiên các bạn quen nhau nhé 📍</div>'; updateUpcomingBanner([]); return; }
+  const withNext = entries.map(([id,v])=>({id,...v, next: nextOccurrence(v.date, v.repeat)}));
+  withNext.sort((a,b)=> new Date(a.date) - new Date(b.date));
+  list.innerHTML = withNext.map(v=>{
+    const years = Math.floor((new Date(v.date+'T00:00:00') ? (new Date() - new Date(v.date+'T00:00:00'))/(365.25*86400000) : 0));
+    return `<div class="tl-item">
+      <div class="tl-title">${escapeHtml(v.title)} ${v.repeat==='yes' && years>=1 ? `<span class="tl-days">· năm thứ ${years+1}</span>`:''}</div>
+      <div class="tl-date">${formatDate(v.date)}</div>
+      ${v.note?`<div class="tl-note">${escapeHtml(v.note)}</div>`:''}
+      <button class="del-x" onclick="removeItem('milestones','${v.id}')">Xoá</button>
+    </div>`;
+  }).join('');
+  updateUpcomingBanner(withNext.filter(v=>v.repeat==='yes'));
+}
+function updateUpcomingBanner(repeatables){
+  const now = new Date(); now.setHours(0,0,0,0);
+  const upcoming = repeatables
+    .map(v=>({...v, daysLeft: Math.ceil((v.next-now)/86400000)}))
+    .filter(v=>v.daysLeft>=0 && v.daysLeft<=14)
+    .sort((a,b)=>a.daysLeft-b.daysLeft)[0];
+  const banner = document.getElementById('upcoming-banner');
+  if(!upcoming){ banner.style.display='none'; return; }
+  banner.style.display='flex';
+  document.getElementById('upcoming-title').textContent = upcoming.title;
+  document.getElementById('upcoming-days').textContent = upcoming.daysLeft===0 ? 'Là hôm nay đó! 🎉' : `còn ${upcoming.daysLeft} ngày nữa`;
+}
+
+/* =========================================================
+   NHẮN NHỦ
+   ========================================================= */
+function openNoteModal(){
+  document.getElementById('note-text').value='';
+  document.getElementById('note-modal').classList.add('show');
+}
+function saveNote(){
+  const text = document.getElementById('note-text').value.trim();
+  if(!text){ return; }
+  const id = db.ref('notes').push().key;
+  db.ref('notes/'+id).set({ author: currentUser, text, createdAt: Date.now(), read:false });
+  closeModal('note-modal');
+  showToast('Đã gửi lời nhắn 💌');
+}
+function renderNotes(){
+  const list = document.getElementById('note-list');
+  const entries = Object.entries(noteData).sort((a,b)=>b[1].createdAt-a[1].createdAt);
+  if(entries.length===0){ list.innerHTML='<div class="empty">Chưa có lời nhắn nào. Gửi điều gì đó ngọt ngào đi 💌</div>'; return; }
+  list.innerHTML = entries.map(([id,v])=>{
+    const u = CFG.users[v.author];
+    const unreadClass = (!v.read && v.author!==currentUser) ? 'note-unread' : '';
+    return `<div class="card ${unreadClass}">
+      <div class="card-top">
+        <span class="badge" style="background:${u.color}">${u.emoji} ${u.name}</span>
+        <span class="card-date">${new Date(v.createdAt).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</span>
+      </div>
+      <div class="card-body">${escapeHtml(v.text)}</div>
+      <div class="note-actions">
+        ${(!v.read && v.author!==currentUser)?`<button onclick="markRead('${id}')">Đánh dấu đã đọc</button>`:''}
+        ${v.author===currentUser?`<button onclick="removeItem('notes','${id}')">Xoá</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+function markRead(id){ db.ref('notes/'+id+'/read').set(true); }
+
+/* =========================================================
+   TIỆN ÍCH CHUNG
+   ========================================================= */
+function removeItem(path,id){
+  if(!confirm('Xoá mục này?')) return;
+  db.ref(path+'/'+id).remove();
+}
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+function showView(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.toggle('active', el.dataset.view===v));
+}
+function saveSettings(){
+  showToast('Đã lưu (đổi ngày yêu nhau trong file cấu hình để áp dụng cho cả hai người)');
+}
+
+init();
+</script>
+</body>
+</html>
